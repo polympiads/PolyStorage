@@ -16,17 +16,17 @@ def create_bucket_instance(request, *args, **kwargs):
         return HttpResponseBadRequest("Invalid JSON format")
 
     required_fields = ["name", "root_path", "bucket_type", "external_provider", "mount_permissions"]
-    missing_fields = [field for field in required_fields if field not in request.POST]
+    missing_fields = [field for field in required_fields if field not in data]
 
     if missing_fields:
         return HttpResponseBadRequest(f"Missing required fields: {', '.join(missing_fields)}")
 
     bucket_instance = BucketInstance.objects.create(
-        name=request.POST["name"],
-        root_path=request.POST["root_path"],
-        bucket_type=request.POST["bucket_type"],
-        external_provider=request.POST["external_provider"],
-        mount_permissions=request.POST["mount_permissions"]
+        name=data["name"],
+        root_path=data["root_path"],
+        bucket_type=data["bucket_type"],
+        external_provider=data["external_provider"],
+        mount_permissions=data["mount_permissions"]
     )
 
     return JsonResponse({"message": "Bucket instance created successfully", "id": bucket_instance.id})

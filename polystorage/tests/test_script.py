@@ -1,22 +1,25 @@
 import requests
+from django.test import TestCase, Client, override_settings
+from django.conf import settings
+from django.utils.timezone import override
 
-url = ('http://localhost:8000/api/v1/bucketinst/create/')
-headers = {'Content-Type': 'application/json'}
 
-data = {
-    "name": "TestBucket",
-    "root_path": "/mnt/data",
-    "bucket_type": "STANDARD",
-    "external_provider": "",
-    "mount_permissions": ""
-}
+class CreateBucketInstanceTest(TestCase):
+    @override_settings(ROOT_URLCONF='polystorage.urls')
+    def test_create_bukect_instance (self):
+        client = Client()
+        url = ('http://localhost:8000/api/v1/bucketinst/create/')
+        headers = {'Content-Type': 'application/json'}
 
-response = requests.post(url, json=data, headers=headers) # Sends JSON in body
+        data = {
+            "name": "TestBucket",
+            "root_path": "/mnt/data",
+            "bucket_type": "STANDARD",
+            "external_provider": "",
+            "mount_permissions": ""
+        }
 
-print("Status Code:", response.status_code)
-print("Raw Response Text:", response.text) # Print the server response
+        response = client.post(url, json=data, headers=headers) # Sends JSON in body
 
-try:
-    print("JSON Response:", response.json()) # Handle JSON response safely
-except requests.exceptions.JSONDecodeError:
-    print("Non-JSON response:", response.text)
+        print("Status Code:", response.status_code)
+
