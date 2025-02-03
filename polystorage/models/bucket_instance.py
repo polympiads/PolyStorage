@@ -1,16 +1,13 @@
 from django.db import models
 from django.core.exceptions import ValidationError
+from polystorage.constants import BUCKET_TYPES
 
 class BucketInstance(models.Model):
     objects = models.Manager()  # Default manager
-    BUCKET_INSTANCE_TYPES = [
-        ('STANDARD', 'Standard Storage Bucket Instance'),
-        ('EXTERNAL', 'External Provider Bucket Instance')
-    ]
 
     name = models.CharField(max_length=255)
     root_path = models.CharField(max_length=255)
-    bucket_type = models.CharField(max_length=20, choices=BUCKET_INSTANCE_TYPES, default='STANDARD')
+    bucket_type = models.CharField(max_length=20, choices=BUCKET_TYPES, default='STANDARD')
     external_provider = models.CharField(max_length=255, null=True, blank=True)
     mount_permissions = models.CharField(max_length=1024, blank=True, default='')
 

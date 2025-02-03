@@ -1,14 +1,10 @@
 from django.db import models
 from django.core.exceptions import ValidationError
-import uuid
+from polystorage.constants import BUCKET_TYPES
 
 
 class Bucket(models.Model):
     objects = models.Manager()  # Default manager
-    BUCKET_TYPES = [
-        ('STANDARD', 'Standard Storage Bucket'),
-        ('EXTERNAL', 'External Provider Bucket')
-    ]
 
     name = models.CharField(max_length=255, unique=True)
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
