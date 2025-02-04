@@ -27,17 +27,17 @@ def create_bucket_instance(request, *args, **kwargs):
         return HttpResponseBadRequest("Invalid signature")
 
     required_fields = ["name", "root_path", "bucket_type", "external_provider", "mount_permissions"]
-    missing_fields = [field for field in required_fields if field not in data]
+    missing_fields = [field for field in required_fields if field not in payload]
 
     if missing_fields:
         return HttpResponseBadRequest(f"Missing required fields: {', '.join(missing_fields)}")
 
     bucket_instance = BucketInstance.objects.create(
-        name=data["name"],
-        root_path=data["root_path"],
-        bucket_type=data["bucket_type"],
-        external_provider=data["external_provider"],
-        mount_permissions=data["mount_permissions"]
+        name=payload["name"],
+        root_path=payload["root_path"],
+        bucket_type=payload["bucket_type"],
+        external_provider=payload["external_provider"],
+        mount_permissions=payload["mount_permissions"]
     )
 
     return JsonResponse({"message": "Bucket instance created successfully", "id": bucket_instance.id})
