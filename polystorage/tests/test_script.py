@@ -22,4 +22,3 @@ class CreateBucketInstanceTest(TestCase):
         response = client.post(url, json=data, headers=headers) # Sends JSON in body
 
         print("Status Code:", response.status_code)
-

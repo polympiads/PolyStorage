@@ -1,5 +1,7 @@
 import json
 import requests
+import os
+import uuid
 from django.db import models
 from django.core.exceptions import ValidationError
 from polystorage.constants import BUCKET_TYPES
@@ -13,7 +15,7 @@ class Bucket(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, editable=False)
     modified_at = models.DateTimeField(auto_now=True)
     description = models.TextField(blank=True)
-    root_path = models.CharField(max_length=255)
+    root_path = models.CharField(max_length=255, editable=False)
 
     bucket_type = models.CharField(max_length=20, choices=BUCKET_TYPES, default='STANDARD', editable=False)
     external_provider = models.CharField(max_length=255, null=True, blank=True, editable=False)
@@ -57,13 +59,23 @@ class Bucket(models.Model):
             self.create_associated_bucket_instance()
 
     def create_associated_bucket_instance(self):
+        # Generate a random folder name
+        random_folder = uuid.uuid4().hex[:8]
+        # Use the INSTANCES_MAIN_FOLDER setting as the base directory
+        base_folder = settings.INSTANCES_MAIN_FOLDER
+        # Construct the full root path
+        generated_root_path = os.path.join(base_folder, random_folder)
+
         payload = {
             'name': self.name,
-            'root_path': self.root_path,
+            'root_path': generated_root_path,
             'bucket_type': self.bucket_type,
             'external_provider': self.external_provider,
             'mount_permissions': self.mount_permissions,
         }
+
+        self.root_path = generated_root_path
+        self.save(update_fields=['root_path'])
 
         # Sign the payload using a private key
         private_key = settings.STORAGE_ROOT_PRIVATE_KEY

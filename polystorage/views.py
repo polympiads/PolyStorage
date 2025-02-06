@@ -10,7 +10,12 @@ from django.conf import settings
 @csrf_exempt
 def create_bucket_instance(request, *args, **kwargs):
     if request.method != "POST":
-        return HttpResponseBadRequest("Invalid request method. Expected POST")
+        return JsonResponse({
+            "error": "Invalid request method",
+            "reasons": ["Expected POST"]
+        },
+        status=400
+    )
 
     try:
         data = json.loads(request.body.decode("utf-8"))
