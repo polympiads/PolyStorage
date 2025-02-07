@@ -6,7 +6,7 @@ from django.utils.timezone import override
 
 class CreateBucketInstanceTest(TestCase):
     @override_settings(ROOT_URLCONF='polystorage.urls')
-    def test_create_bukect_instance (self):
+    def test_create_bucket_instance (self):
         client = Client()
         url = ('http://localhost:8000/api/v1/bucketinst/create/')
         headers = {'Content-Type': 'application/json'}

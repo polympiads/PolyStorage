@@ -53,35 +53,23 @@ class Bucket(models.Model):
                     raise ValidationError(f"{field} is immutable and cannot be modified")
 
         self.clean()
-        super().save(*args, **kwargs)  # Save first to get the ID
 
         if is_new:
             self.create_associated_bucket_instance()
 
-    def create_associated_bucket_instance(self):
-        # Generate a random folder name
-        random_folder = uuid.uuid4().hex[:8]
-        # Use the INSTANCES_MAIN_FOLDER setting as the base directory
-        base_folder = settings.INSTANCES_MAIN_FOLDER
-        # Construct the full root path
-        generated_root_path = os.path.join(base_folder, random_folder)
+        super().save(*args, **kwargs)
 
+    def create_associated_bucket_instance(self):
         payload = {
             'name': self.name,
-            'root_path': generated_root_path,
             'bucket_type': self.bucket_type,
             'external_provider': self.external_provider,
             'mount_permissions': self.mount_permissions,
         }
 
-        self.root_path = generated_root_path
-        self.save(update_fields=['root_path'])
-
-        # Sign the payload using a private key
         private_key = settings.STORAGE_ROOT_PRIVATE_KEY
         signed_payload = jws.sign(payload, private_key, algorithm='RS256')
 
-        # Send the signed payload to the API
         api_url = settings.API_URL + '/api/v1/bucketinst/create/'
         headers = {'Content-Type': 'application/json'}
 
@@ -89,6 +77,13 @@ class Bucket(models.Model):
 
         if response.status_code != 200:
             raise Exception(f"Failed to create bucket instance: {response.text}")
+
+        # Extract the generated root_path from the API response
+        response_data = response.json()
+        self.root_path = response_data.get('root_path')
+
+        if not self.root_path:
+            raise Exception("API response missing 'root path'")
 
     def __str__(self):
         return f"{self.name}"
