@@ -1,6 +1,7 @@
 import uuid
 import os
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render
 
 from .models.bucket_instance import BucketInstance
@@ -66,3 +67,23 @@ def create_bucket_instance(request, *args, **kwargs):
         "id": bucket_instance.id,
         "root_path": generated_root_path # Include in JSON response
     })
+
+@csrf_exempt
+def access_bucket_instance(request, name):
+    if request.method != "GET":
+        return JsonResponse({
+                "error": "Invalid request method",
+                "reasons": ["Expected GET"]
+        }, status=400)
+    try:
+        bucket_instance = BucketInstance.objects.get(name=name)
+    except ObjectDoesNotExist:
+        return JsonResponse({
+            "error": "Bucket instance not found",
+        }, status=400)
+    return JsonResponse({
+        "name": bucket_instance.name,
+        "bucket_type": bucket_instance.bucket_type,
+        "external_provider": bucket_instance.external_provider,
+        "mount_permissions": bucket_instance.mount_permissions
+    }, status=200)
